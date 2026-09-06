@@ -8,7 +8,6 @@
 
 * Server Lifecycle
 ** Build Docker Image
-
 #+begin_src bash :dir .. :results output
 docker compose build > /dev/null 2>&1
 echo "ok"
@@ -18,7 +17,6 @@ echo "ok"
 : ok
 
 ** Launch Server
-
 #+begin_src bash :dir .. :results output
 docker compose up -d > /dev/null 2>&1
 echo "ok"
@@ -28,17 +26,15 @@ echo "ok"
 : ok
 
 ** Check Connection
-
 #+begin_src bash :results output
 code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/healthz)
 [ "$code" = "200" ] && echo "healthz: $code" || echo "unavailable"
 #+end_src
 
 #+RESULTS:
-: healthz: 200
+: unavailable
 
 ** Stop Server
-
 #+begin_src bash :dir .. :results output
 docker compose down > /dev/null 2>&1
 curl -f -s http://localhost/8080/healthz || echo "ok"
@@ -63,7 +59,7 @@ curl -s -o blurred-v1.jpg -w "%{http_code}\n%{content_type}\n" \
 
 [[file:blurred-v1.jpg]]
 
-* Blur (sigma = 10.0)
+* Blur (sigma = 20.0)
 
 #+begin_src bash :results output
 curl -s -o blurred-v2.jpg -w "%{http_code}\n%{content_type}\n" \
