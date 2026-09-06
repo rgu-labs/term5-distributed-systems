@@ -82,6 +82,7 @@ Without image and incorrect sigma
 curl -s -w " -> %{http_code}\n" -F "sigma=2.0" http://localhost:8080/api/blur
 curl -s -w " -> %{http_code}\n" -F "sigma=abc" -F "image=@DoNotOpen.jpg" http://localhost:8080/api/blur
 curl -s -w " -> %{http_code}\n" -F "sigma=50" -F "image=@DoNotOpen.jpg" http://localhost:8080/api/blur
+curl -s -w " -> %{http_code}\n" -F "sigma=-2.5" -F "image=@DoNotOpen.jpg" http://localhost:8080/api/blur
 #+end_src
 
 #+RESULTS:
