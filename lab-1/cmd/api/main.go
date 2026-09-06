@@ -8,8 +8,11 @@ import (
 	"os"
 	"time"
 
+	delivery "github.com/rgu-labs/term5-distributed-systems/lab-1/internal/delivery/http"
+	"github.com/rgu-labs/term5-distributed-systems/lab-1/internal/service"
 	"github.com/rgu-labs/term5-distributed-systems/lib/config"
 	httpserver "github.com/rgu-labs/term5-distributed-systems/lib/http"
+	"github.com/rgu-labs/term5-distributed-systems/lib/http/middleware"
 	"github.com/rgu-labs/term5-distributed-systems/lib/log"
 	"github.com/rgu-labs/term5-distributed-systems/lib/shutdown"
 )
@@ -31,9 +34,16 @@ func main() {
 
 	ctx := context.Background()
 
-	_, srv, _ := httpserver.New(
+	mux, srv, _ := httpserver.New(
 		httpserver.Config{Addr: fmt.Sprintf(":%d", cfg.Port)},
 		httpserver.Default(),
+	)
+
+	blurSvc := service.NewBlur()
+
+	mux.Handle(
+		"POST /api/blur",
+		middleware.LimitBody(10<<20)(delivery.NewBlurHandler(blurSvc)),
 	)
 
 	sm := shutdown.NewManager()
