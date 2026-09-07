@@ -32,7 +32,7 @@ code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/healthz)
 #+end_src
 
 #+RESULTS:
-: unavailable
+: healthz: 200
 
 ** Stop Server
 #+begin_src bash :dir .. :results output
@@ -89,3 +89,4 @@ curl -s -w " -> %{http_code}\n" -F "sigma=-2.5" -F "image=@DoNotOpen.jpg" http:/
 : {"code":"BAD_REQUEST","error":"image file is required"} -> 400
 : {"code":"BAD_REQUEST","error":"invalid sigma parameter"} -> 400
 : {"code":"BAD_REQUEST","error":"sigma should be less or equal to 20.00"} -> 400
+: {"code":"BAD_REQUEST","error":"sigma should be positive"} -> 400
