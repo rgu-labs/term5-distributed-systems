@@ -1,0 +1,8 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: lab-2/Dockerfile
+    restart: "no"
+    volumes:
+      - ./numbers.txt:/app/numbers.txt:ro
