@@ -21,10 +21,10 @@ type StrategyStat struct {
 }
 
 type Report struct {
-	Strategies    []StrategyStat
-	TotalNumbers  int
-	TotalOps      int
-	Duration      time.Duration
+	Strategies   []StrategyStat
+	TotalNumbers int
+	TotalOps     int
+	Duration     time.Duration
 }
 
 func DefaultStrategies() []Strategy {
