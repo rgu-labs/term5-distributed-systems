@@ -52,9 +52,9 @@ func DefaultStrategies() []Strategy {
 	}
 }
 
-func Process(out io.Writer, r *FileReader, a int, strategies []Strategy) (*Report, error) {
-	if r == nil {
-		return nil, errors.New("reader is nil")
+func Process(out io.Writer, path string, a int, strategies []Strategy) (*Report, error) {
+	if path == "" {
+		return nil, errors.New("input file path is empty")
 	}
 	if len(strategies) == 0 {
 		return nil, errors.New("at least one strategy is required")
@@ -72,9 +72,20 @@ func Process(out io.Writer, r *FileReader, a int, strategies []Strategy) (*Repor
 		}
 	}()
 
-	done := make(chan StrategyStat, len(strategies))
+	type result struct {
+		stat StrategyStat
+		err  error
+	}
+	done := make(chan result, len(strategies))
 	for _, s := range strategies {
 		go func(s Strategy) {
+			r, err := Open(path)
+			if err != nil {
+				done <- result{err: fmt.Errorf("open input file: %w", err)}
+				return
+			}
+			defer r.Close()
+
 			processed := 0
 			for {
 				n, ok := r.Next()
@@ -84,13 +95,21 @@ func Process(out io.Writer, r *FileReader, a int, strategies []Strategy) (*Repor
 				lines <- fmt.Sprintf("[Strategy %d] number %d -> %s", s.ID, n, s.Apply(n, a))
 				processed++
 			}
-			done <- StrategyStat{ID: s.ID, Processed: processed}
+			if err := r.Err(); err != nil {
+				done <- result{err: fmt.Errorf("read input: %w", err)}
+				return
+			}
+			done <- result{stat: StrategyStat{ID: s.ID, Processed: processed}}
 		}(s)
 	}
 
 	rep := &Report{Strategies: make([]StrategyStat, 0, len(strategies))}
 	for range strategies {
-		rep.Strategies = append(rep.Strategies, <-done)
+		res := <-done
+		if res.err != nil {
+			return nil, res.err
+		}
+		rep.Strategies = append(rep.Strategies, res.stat)
 	}
 	rep.Duration = time.Since(start)
 
@@ -100,13 +119,12 @@ func Process(out io.Writer, r *FileReader, a int, strategies []Strategy) (*Repor
 	for _, st := range rep.Strategies {
 		rep.TotalOps += st.Processed
 	}
-	rep.TotalNumbers = rep.TotalOps
+	if len(rep.Strategies) > 0 {
+		rep.TotalNumbers = rep.Strategies[0].Processed
+	}
 
 	close(lines)
 	<-printerDone
 
-	if err := r.Err(); err != nil {
-		return nil, fmt.Errorf("read input: %w", err)
-	}
 	return rep, nil
 }

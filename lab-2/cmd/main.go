@@ -27,11 +27,6 @@ func main() {
 		fatal(err.Error())
 	}
 
-	fr, err := reader.Open(cfg.input)
-	if err != nil {
-		fatal(err.Error())
-	}
-
 	strategies := reader.DefaultStrategies()
 
 	reportHeader(cfg, total, len(strategies))
@@ -41,17 +36,13 @@ func main() {
 	fmt.Println("START PROCESSING")
 	fmt.Println(divider)
 
-	rep, err := reader.Process(os.Stdout, fr, cfg.param, strategies)
+	rep, err := reader.Process(os.Stdout, cfg.input, cfg.param, strategies)
 	if err != nil {
 		fatal("processing failed: " + err.Error())
 	}
 
 	reportStats(rep)
 	reportPerformance(rep.Duration)
-
-	if err := fr.Close(); err != nil {
-		fatal("close input file: " + err.Error())
-	}
 }
 
 func parseFlags() config {
