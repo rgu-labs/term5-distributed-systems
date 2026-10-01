@@ -3,5 +3,6 @@ go 1.27.0
 use (
 	./lab-1
 	./lab-2
+	./lab-3
 	./lib
 )

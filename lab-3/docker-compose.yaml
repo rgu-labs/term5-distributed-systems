@@ -1,0 +1,51 @@
+services:
+  kafka:
+    build:
+      context: ./kafka
+      dockerfile: Dockerfile
+    image: lab-3-kafka:latest
+    hostname: kafka
+    restart: unless-stopped
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    ports:
+      - "127.0.0.1:9094:9094"
+
+  kafka-init:
+    image: lab-3-kafka:latest
+    restart: "no"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: "${KAFKA_BOOTSTRAP_SERVERS}"
+      KAFKA_TOPICS: "${KAFKA_TOPICS}"
+      TOPIC_PARTITIONS: "${TOPIC_PARTITIONS}"
+    command: ["/usr/local/bin/kafka-create-topics"]
+
+  pinger:
+    build:
+      context: ..
+      dockerfile: lab-3/Dockerfile
+      args:
+        APP: pinger
+    image: lab-3-pinger:latest
+    restart: unless-stopped
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+
+  ponger:
+    build:
+      context: ..
+      dockerfile: lab-3/Dockerfile
+      args:
+        APP: ponger
+    image: lab-3-ponger:latest
+    restart: unless-stopped
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+
+volumes:
+  kafka_data:
