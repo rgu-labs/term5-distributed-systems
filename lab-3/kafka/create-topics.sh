@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-bootstrap="${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}"
-partitions="${TOPIC_PARTITIONS:-1}"
-topics="${KAFKA_TOPICS:-Ping Pong}"
+bootstrap="${KAFKA_BOOTSTRAP_SERVERS}"
+partitions="${TOPIC_PARTITIONS}"
+topics="${KAFKA_TOPICS}"
 
 for topic in $topics; do
   echo "===> Creating topic $topic (partitions=$partitions)"
